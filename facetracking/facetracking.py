@@ -1,61 +1,46 @@
 import cv2, imutils
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+import os
 
+print("Current working directory:", os.getcwd())
 
-class Tracking:
+frame_number = 1
+text_font = cv2.FONT_HERSHEY_SIMPLEX
 
-	# Create an instance of the opencv TrackerCSRT Reference Class
+cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
+vid = cv2.VideoCapture(0)
+# Read the first frame of the video file use "_," to ignore variable type, ignores the tuple
 
-	tracker = cv2.legacy.TrackerKCF_create()
-	camera = True # False for vid, True for Webcam
-	frame_number = 1
-	text_font = cv2.FONT_HERSHEY_SIMPLEX
+while True:
+	ret, frame = vid.read()
+	frame = imutils.resize(frame,width = 1080) 
+	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	res = cascade_classifier.detectMultiScale(gray, 1.3, 5)
 
-	# Initial Conditions + System Properties
+	if(len(res) > 0):
+		(x,y,w,h) = res[0]
+		adj = max(w,h)
+		if w < h:
+			w = h
+		else:
+			h = w
+		frame = cv2.rectangle(frame, (x,y), (x + w, y + h), (0, 0 ,255), 3)
 
-	frame_per_second = 120
-	frame_dt = 1 / frame_per_second
+	# Display frame count
 
-	if camera: 
-		vid  = cv2.VideoCapture(0)
+	cv2.putText(frame, "Frame Count: " + str(frame_number), (50, 50), text_font, 1, (0, 255, 255), 2, cv2.LINE_4)
+	print(frame_number)
 
-	# Read the first frame of the video file use "_," to ignore variable type, ignores the tuple
+	cv2.imshow('Output', frame)
 
-	_,frame = vid.read()
-	frame = imutils.resize(frame,width = 1080)
+	# Always checking for 'q' key every frame in the while loop to exit whenever
 
-	OBJ = cv2.selectROI(frame, False)
-	tracker.init(frame, OBJ)
+	key  =  cv2.waitKey(1) & 0xff  
 
-	while True:
-		_,frame = vid.read()
-		frame = imutils.resize(frame,width = 1080) 
-
-		track_success, OBJ = tracker.update(frame)
-
-		# Draw a rectangle for success
-
-		if track_success:
-			top_left = (int(OBJ[0]),int(OBJ[1]))
-			bottom_right = (int(OBJ[0] + OBJ[2]), int(OBJ[1] + OBJ[3]))
-			cv2.rectangle(frame,top_left,bottom_right,(0,0,255),5)
-
-		# Display frame count
-
-		cv2.putText(frame, "Frame Count: " + str(frame_number), (50, 50), text_font, 1, (0, 255, 255), 2, cv2.LINE_4)
-		print(frame_number)
-
-		cv2.imshow('Output', frame)
-
-		# Always checking for 'q' key every frame in the while loop to exit whenever
-
-		key  =  cv2.waitKey(1) & 0xff  
-
-		if key == ord('q'):
-			frame_number = 1
-			break
-
-	vid.release()
-	cv2.destroyAllWindows()
+	if key == ord('q'):
+		frame_number = 1
+		break
+	frame_number += 1
+# vid.release()
+# cv2.destroyAllWindows()
