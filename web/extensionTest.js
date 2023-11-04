@@ -2,4 +2,4 @@
 
 /*
 So how Forest tracks usage is that it does so in the background. 
-*/
+*/// background.js
