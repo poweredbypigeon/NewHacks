@@ -11,10 +11,14 @@
   "icons": {
     "512": "images/test-icon.png"
   },
+  "background":{
+    "scripts": ["background.js"]
+  },
   "browser_action":{
     "default_icon":{
       "512": "images/test-icon-toolbar.png"
     },
     "default_popup": "index.html"
-   }
+   },
+   "permissions": ["storage", "unlimitedStorage", "activeTab", "tabs"]
 }
