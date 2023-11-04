@@ -1,5 +1,5 @@
 
-function reportChange (tabId, tab) {
+function reportChange (tabId) {
     // Assuming by 'value' you mean the URL of the tab
     // The URL might not be available immediately if the tab is not yet fully loaded
     console.log(`New tab created with ID: ${tabId}`);
@@ -12,10 +12,12 @@ function reportChange (tabId, tab) {
     });
 }
 
-chrome.tabs.onActivated.addListener(reportChange);
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+    reportChange(activeInfo.tabId);
+});
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (changeInfo.status === "complete") {
-        reportChange(tabId, tab);
+        reportChange(tabId);
     } else {
         // console.log(changeInfo.status);
     }
