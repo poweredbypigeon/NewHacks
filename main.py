@@ -14,13 +14,25 @@ import matplotlib.pyplot as plt
 from eyetracker.eyetracker import determine_focus_status
 from cnn_running import fatigue_pred
 
-tired_threshold = 50
-focus_threshold = 50
+tired_threshold = 0.05
+focus_threshold = 0.05
 
 user_data = []
 frame_number = 1
 cur_tired = ""
 text_font = cv2.FONT_HERSHEY_SIMPLEX
+
+def check_tiredness(user_data):
+    if len(user_data) > 70:
+        if [cur_state[1] for cur_state in user_data[-51:-1]].count(True)/50 >= tired_threshold:
+            return True
+    return False
+
+def check_unfocusness(user_data):
+    if len(user_data) > 70:
+        if [cur_state[2] for cur_state in user_data[-51:-1]].count(True)/50 >= tired_threshold:
+            return True
+    return False
 
 cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
 vid = cv2.VideoCapture(0)
@@ -56,7 +68,11 @@ while True:
          cur_state.append(False)
          cur_state.append(False)
 
-    user_data.append([time, cur_tired, cur_state])
+    user_data.append(cur_state)
+    if(check_tiredness(user_data) == True):
+        print("YOU ARE TIRED")
+    if(check_unfocusness(user_data) == True):
+        print("STAY ON TASK")
     
     cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
     cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
@@ -74,15 +90,6 @@ while True:
 # vid.release()
 # cv2.destroyAllWindows()
 
-def check_tiredness():
-    if user_data[-1:-31][1].count(True)/30 >= tired_threshold:
-         return True
-    else: return False
-
-def check_focusness():
-    if user_data[-1:-31][2].count(True)/30 >= tired_threshold:
-         return True
-    else: return False
 
 # def final_report():
 #     plt.figure(figsize=(10, 5))
