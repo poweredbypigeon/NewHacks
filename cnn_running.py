@@ -11,7 +11,7 @@ def load_single_image(image, img_size=(48, 48)):
     #unix_path = path.replace('\\', '/')
     #path = path if platform.system() == 'Windows' else unix_path
     # Open image, resize it and convert to grayscale 
-    img = Image.open(image).resize(img_size).convert('L') 
+    img = image.resize(img_size).convert('L') 
     # Convert image to numpy array and normalize (rescale) it
     img = np.array(img) / 255.0
     
