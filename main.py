@@ -37,7 +37,7 @@ cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, '
 vid = cv2.VideoCapture(0)
 # Read the first frame of the video file use "_," to ignore variable type, ignores the tuple
 
-start_time = time()
+start_time = time.time()
 
 while True:
     ret, frame = vid.read()
@@ -64,7 +64,7 @@ while True:
     if(check_unfocusness(user_data) == True):
         print("STAY ON TASK")
 
-    time_in_seconds = (time() - start_time) / 1000
+    time_in_seconds = (time.time() - start_time) / 1000
     
     cv2.putText(frame, "Time Elapsed: " + str(time_in_seconds), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
     cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
