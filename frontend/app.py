@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import threading
 import cv2
@@ -6,6 +7,7 @@ import base64
 import time
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app)
 
 send_data = True
