@@ -14,27 +14,32 @@ import matplotlib.pyplot as plt
 from eyetracker.eyetracker import determine_focus_status
 from cnn_running import fatigue_pred
 
-tired_threshold = 0.1
-focus_threshold = 0.1
+tired_threshold = 0.25
+focus_threshold = 0.25
 
 user_data = []
 frame_number = 1
 cur_tired, cur_focus = "", ""
 text_font = cv2.FONT_HERSHEY_SIMPLEX
 time_data, tired_data, unfocus_data = [], [], []
+globtired_data, globunfocus_data = [], []
 popup_tired = False
 popup_unfocus = False
 
 def check_tiredness(tired_data):
     if len(tired_data) > 70:
         if tired_data[-51:-1].count(True)/50 >= tired_threshold:
+            globtired_data.append(True)
             return True
+    globtired_data.append(False)
     return False
 
 def check_unfocusness(unfocus_data):
     if len(unfocus_data) > 70:
         if unfocus_data[-51:-1].count(True)/50 >= tired_threshold:
+            globunfocus_data.append(True)
             return True
+    globunfocus_data.append(False)
     return False
 
 def plot_report(user_data):
@@ -42,14 +47,18 @@ def plot_report(user_data):
     plt.rcParams["figure.autolayout"] = True
 
     data = user_data
+    user_data.append(globtired_data)
+    user_data.append(globunfocus_data)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.imshow(data, aspect='auto', cmap="viridis", interpolation='nearest')
-    section_labels = ['Time (s)', 'Tired', 'Unfocused']
+    ax.imshow(data, aspect='auto', cmap="Blues_r", interpolation='nearest')
+    section_labels = ['Time (s)', 'Instant Tired', 'Instant Unfocused', 'Actual Tired', 'Actual Unfocused'] 
     ax.set_title("Productivity Report of Session")
     ax.set_yticks(range(len(section_labels)))
     ax.set_yticklabels(section_labels)
-    ax.set_xlabel('Time Elapsed (s)')
+    # x_val = np.linspace(0, user_data[0][-1], 5)
+    # ax.set_xticklabels(x_val)
+    ax.set_xlabel('Frames Elapsed (n)')
     fig.savefig('prodreport.png')
     plt.show()
 
@@ -62,7 +71,7 @@ while True:
     frame = imutils.resize(frame,width = 1080) 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     res = cascade_classifier.detectMultiScale(gray, 1.3, 5)
-    time = round(frame_number/30, 2)
+    time = round((4*frame_number)/30, 2)
     time_data.append(time)
 
     if len(res) > 0:
@@ -116,4 +125,4 @@ user_data = [time_data, tired_data, unfocus_data]
 plot_report(user_data)
 
 
-# push
+# FINAL push
