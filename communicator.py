@@ -22,6 +22,7 @@ import threading  # Import the threading module
 app = Flask(__name__)
 
 import main
+import time
 
 # Variable to track the state of data sending
 send_data = True
