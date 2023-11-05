@@ -30,14 +30,14 @@ while True:
     if len(res) > 0:
         (x,y,w,h) = res[0]
         w,h = max(w,h),max(w,h)
-        print(frame)
-        if fatigue_pred(frame[x,y,w,h]) == True:
+        if fatigue_pred(res[0]) == True:
             cur_state = "Fatigue"
         else: 
             cur_state = "Active"
         frame = cv2.rectangle(frame, (x,y), (x + w, y + h), (0, 0 ,255), 3)
 
-    cv2.putText(frame, "Frame Count: " + str(frame_number), (50, 50), text_font, 0.8, (0, 255, 255), 1, cv2.LINE_4)
+    time = round(frame_number/30, 2)
+    cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (0, 255, 255), 1, cv2.LINE_4)
     cv2.putText(frame, "Current State: " + cur_state, (500, 50), text_font, 0.8, (0, 255, 255), 1, cv2.LINE_4)
     print(frame_number)
 
