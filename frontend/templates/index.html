@@ -164,9 +164,9 @@
         let isCameraOn = false;
 
         // // Add logic for starting/stopping data sending
-        // document.getElementById('toggleButton').addEventListener('click', function() {
-        //     socket.emit('toggle_data_sending');
-        // });
+        document.getElementById('toggleButton').addEventListener('click', function() {
+             socket.emit('toggle_data_sending');
+        });
 
         document.getElementById('toggleCamera').addEventListener('click', function() {
             isCameraOn = !isCameraOn;
