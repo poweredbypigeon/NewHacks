@@ -10,6 +10,7 @@ import cv2, imutils
 import numpy as np
 import pandas as pd
 import os
+import time 
 from cnn_running import fatigue_pred
 
 tired_threshold = 0.05
@@ -36,6 +37,8 @@ cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, '
 vid = cv2.VideoCapture(0)
 # Read the first frame of the video file use "_," to ignore variable type, ignores the tuple
 
+start_time = time()
+
 while True:
     ret, frame = vid.read()
     frame = imutils.resize(frame,width = 1080) 
@@ -60,8 +63,10 @@ while True:
         print("YOU ARE TIRED")
     if(check_unfocusness(user_data) == True):
         print("STAY ON TASK")
+
+    time_in_seconds = (time() - start_time) / 1000
     
-    cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
+    cv2.putText(frame, "Time Elapsed: " + str(time_in_seconds), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
     cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
 
     cv2.imshow('Output', frame)
