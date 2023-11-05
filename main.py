@@ -14,14 +14,16 @@ import matplotlib.pyplot as plt
 from eyetracker.eyetracker import determine_focus_status
 from cnn_running import fatigue_pred
 
-tired_threshold = 0.05
-focus_threshold = 0.05
+tired_threshold = 0.1
+focus_threshold = 0.1
 
 user_data = []
 frame_number = 1
 cur_tired, cur_focus = "", ""
 text_font = cv2.FONT_HERSHEY_SIMPLEX
 time_data, tired_data, unfocus_data = [], [], []
+popup_tired = False
+popup_unfocus = False
 
 def check_tiredness(tired_data):
     if len(tired_data) > 70:
@@ -44,9 +46,11 @@ def plot_report(user_data):
     ax = fig.add_subplot(111)
     ax.imshow(data, aspect='auto', cmap="viridis", interpolation='nearest')
     section_labels = ['Time (s)', 'Tired', 'Unfocused']
+    ax.set_title("Productivity Report of Session")
     ax.set_yticks(range(len(section_labels)))
     ax.set_yticklabels(section_labels)
     ax.set_xlabel('Time Elapsed (s)')
+    fig.savefig('prodreport.png')
     plt.show()
 
 cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
@@ -73,20 +77,25 @@ while True:
             tired_data.append(False)
         if determine_focus_status(frame) == True:
              cur_focus = "Focused"
-             unfocus_data.append(True)
+             unfocus_data.append(False)
         else:
              cur_focus = "Not Focused"
-             unfocus_data.append(False)
+             unfocus_data.append(True)
         frame = cv2.rectangle(frame, (x,y), (x + w, y + h), (0, 0 ,255), 3)
     else:
-         tired_data.append(False)
-         unfocus_data.append(False)
+         tired_data.append(True)
+         unfocus_data.append(True)
 
-    if(check_tiredness(user_data) == True):
+    if(check_tiredness(tired_data) == True):
         print("YOU ARE TIRED")
-    if(check_unfocusness(user_data) == True):
+        popup_tired = True
+    else:
+        popup_tired = False
+    if(check_unfocusness(unfocus_data) == True):
         print("STAY ON TASK")
-    
+        popup_unfocus = True
+    else:
+        popup_unfocus = False
     cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
     cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
 

@@ -17,5 +17,5 @@ def fatigue_pred(image):
 
     # Predict the class with the model
     prediction = model.predict(np.array([preprocessed_image]), verbose = 0)
-    predicted_class = int(prediction > 0.05)  # Using 0. as the threshold
+    predicted_class = int(prediction > 0.5)  # Using 0. as the threshold
     return True if not predicted_class else False
