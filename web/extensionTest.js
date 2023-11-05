@@ -12,11 +12,11 @@ TODO:
 in the end it's just supposed to trakc whether you're focused or not, and may give you warnings if you're under time. 
 */
 
-document.getElementById('myButton').addEventListener('click', function() {
+document.getElementById('toggle').addEventListener('click', function() {
     // Send a request to your Python script
     fetch('http://localhost:5000/endpoint', {
         method: 'POST',
-        body: JSON.stringify({ data: 'your_data' }),
+        body: JSON.stringify({ signal: document.getElementById('toggle').getAttribute('value')}),
         headers: {
             'Content-Type': 'application/json'
         }
