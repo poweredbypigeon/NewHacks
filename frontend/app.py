@@ -22,28 +22,31 @@ def continuous_data_sender():
 
 
 
-from .eyetracker import track_eyes  # Replace with your actual path to eyetracker.py
+# from eyetracker import track_eyes  # Replace with your actual path to eyetracker.py
 
 
-def generate():
-    cap = cv2.VideoCapture(0)
-    while True:
-        ret, frame = cap.read()
-        if ret:
-            frame = track_eyes(frame)  # Call eye tracking function
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = base64.b64encode(buffer)
-            yield f'data:image/jpeg;base64,{frame_bytes.decode("utf-8")}'
+# def generate():
+#     cap = cv2.VideoCapture(0)
+#     while True:
+#         ret, frame = cap.read()
+#         if ret:
+#             frame = track_eyes(frame)  # Call eye tracking function
+#             _, buffer = cv2.imencode('.jpg', frame)
+#             frame_bytes = base64.b64encode(buffer)
+#             yield f'data:image/jpeg;base64,{frame_bytes.decode("utf-8")}'
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+import subprocess
 @socketio.on('toggle_data_sending')
 def toggle_data_sending():
     global send_data
     send_data = not send_data
     socketio.emit('status_update', {'status': 'Data sending ' + ('enabled' if send_data else 'disabled')})
+    subprocess.run(["python", "main.py"])
+
 
 @socketio.on('toggle_camera')
 def toggle_camera():
