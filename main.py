@@ -10,6 +10,8 @@ import cv2, imutils
 import numpy as np
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+from eyetracker.eyetracker import determine_focus_status
 from cnn_running import fatigue_pred
 
 tired_threshold = 0.05
@@ -17,20 +19,35 @@ focus_threshold = 0.05
 
 user_data = []
 frame_number = 1
-cur_state = ""
+cur_tired, cur_focus = "", ""
 text_font = cv2.FONT_HERSHEY_SIMPLEX
+time_data, tired_data, unfocus_data = [], [], []
 
-def check_tiredness(user_data):
-    if len(user_data) > 70:
-        if [cur_state[1] for cur_state in user_data[-51:-1]].count(True)/50 >= tired_threshold:
+def check_tiredness(tired_data):
+    if len(tired_data) > 70:
+        if tired_data[-51:-1].count(True)/50 >= tired_threshold:
             return True
     return False
 
-def check_unfocusness(user_data):
-    if len(user_data) > 70:
-        if [cur_state[2] for cur_state in user_data[-51:-1]].count(True)/50 >= tired_threshold:
+def check_unfocusness(unfocus_data):
+    if len(unfocus_data) > 70:
+        if unfocus_data[-51:-1].count(True)/50 >= tired_threshold:
             return True
     return False
+
+def plot_report(user_data):
+    plt.rcParams["figure.figsize"] = [5, 7]
+    plt.rcParams["figure.autolayout"] = True
+
+    data = user_data
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.imshow(data, aspect='auto', cmap="viridis", interpolation='nearest')
+    section_labels = ['Time (s)', 'Tired', 'Unfocused']
+    ax.set_yticks(range(len(section_labels)))
+    ax.set_yticklabels(section_labels)
+    ax.set_xlabel('Time Elapsed (s)')
+    plt.show()
 
 cascade_classifier = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
 vid = cv2.VideoCapture(0)
@@ -41,21 +58,30 @@ while True:
     frame = imutils.resize(frame,width = 1080) 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     res = cascade_classifier.detectMultiScale(gray, 1.3, 5)
+    time = round(frame_number/30, 2)
+    time_data.append(time)
 
     if len(res) > 0:
         (x,y,w,h) = res[0]
         w,h = max(w,h),max(w,h)
         # frame[y:y+h, x:x+w]
         if fatigue_pred(gray[y:y+h, x:x+w]) == True:
-            cur_state = "Fatigue"
+            cur_tired = "Fatigue"
+            tired_data.append(True)
         else: 
-            cur_state = "Active"
+            cur_tired = "Active"
+            tired_data.append(False)
+        if determine_focus_status(frame) == True:
+             cur_focus = "Focused"
+             unfocus_data.append(True)
+        else:
+             cur_focus = "Not Focused"
+             unfocus_data.append(False)
         frame = cv2.rectangle(frame, (x,y), (x + w, y + h), (0, 0 ,255), 3)
     else:
-         cur_state.append(False)
-         cur_state.append(False)
+         tired_data.append(False)
+         unfocus_data.append(False)
 
-    user_data.append(cur_state)
     if(check_tiredness(user_data) == True):
         print("YOU ARE TIRED")
     if(check_unfocusness(user_data) == True):
@@ -74,32 +100,11 @@ while True:
         frame_number = 1
         break
     frame_number += 1
-# vid.release()
-# cv2.destroyAllWindows()
+vid.release()
+cv2.destroyAllWindows()
 
-
-# def final_report():
-#     plt.figure(figsize=(10, 5))
-
-    # Plot Focus
-    plt.subplot(1, 2, 1)
-    plt.plot(time_points, focus_data, marker='o', linestyle='-', color='b')
-    plt.title('Focus Over Time')
-    plt.xlabel('Time')
-    plt.ylabel('Focus Level')
-
-    # Plot Tiredness
-    plt.subplot(1, 2, 2)
-    plt.plot(time_points, tiredness_data, marker='o', linestyle='-', color='r')
-    plt.title('Tiredness Over Time')
-    plt.xlabel('Time')
-    plt.ylabel('Tiredness Level')
-
-    plt.tight_layout()
-    plt.show()
-
-# # Call the function to generate the final report
-# final_report()
+user_data = [time_data, tired_data, unfocus_data]
+plot_report(user_data)
 
 
 
