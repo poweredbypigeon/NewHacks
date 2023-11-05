@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Detection Web App</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        #video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+        }
+
+        #controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #toggleButton, #togglePopup, #closePopup {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #toggleButton:hover, #togglePopup:hover, #closePopup:hover {
+            background-color: #45a049;
+        }
+
+        #toggleStatus {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        #toggleStatus.enabled {
+            background-color: #4CAF50;
+        }
+
+        #toggleStatus.disabled {
+            background-color: #FF6347;
+        }
+
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            border-radius: 10px;
+        }
+
+        #popup p {
+            margin: 0;
+            font-size: 18px;
+        }
+        #modeButtons {
+            margin-top: 20px;
+        }
+
+        .modeButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .modeButton:hover {
+            background-color: #45a049;
+        }
+        .featureButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .featureButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="video" autoplay playsinline></video>
+    </div>
+
+    <div id="controls">
+        <button id="toggleButton">Toggle Data Sending</button>
+        <button id="toggleCamera">Toggle Camera</button>
+        <div id="toggleStatus"></div>
+        <button id="togglePopup">See History</button>
+
+    <div id="timer">Timer: <span id="timerDisplay">00:00</span></div>
+
+
+    <div id="modeButtons">
+        <button class="modeButton" onclick="startTimer()">Start Timer</button>
+        <!-- <button class="modeButton" onclick="randomMode()">Random Mode</button> -->
+    </div>
+
+    </div>
+
+    <div id="popup">
+        <p id="popupMessage"></p>
+        <button id="closePopup">Close</button>
+    </div>
+    <div id="additionalFeatures">
+        <button class="featureButton" onclick="takeScreenshot()">Take Screenshot</button>
+        <button class="featureButton" onclick="toggleFullscreen()">Toggle Fullscreen</button>
+        <button class="featureButton" onclick="changeBackground()">Change Background</button>
+    </div>
+    <div id="dataDisplay"></div>
+    <!-- <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed"> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        const video = document.getElementById('video');
+        let isCameraOn = false;
+
+        // // Add logic for starting/stopping data sending
+        // document.getElementById('toggleButton').addEventListener('click', function() {
+        //     socket.emit('toggle_data_sending');
+        // });
+
+        document.getElementById('toggleCamera').addEventListener('click', function() {
+            isCameraOn = !isCameraOn;
+            if (isCameraOn) {
+                startCamera();
+            } else {
+                stopCamera();
+            }
+        });
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch((err) => console.error('Error accessing camera:', err));
+        }
+
+        function stopCamera() {
+            let tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+
+        var toggleStatus = document.getElementById('toggleStatus');
+        var popup = document.getElementById('popup');
+        var popupMessage = document.getElementById('popupMessage');
+        var closePopup = document.getElementById('closePopup');
+
+        // socket.on('popup_status', function(data) {
+        //     if (data.show_popup) {
+        //         popup.style.display = 'block';
+        //         popupMessage.innerHTML = 'Popup message is displayed!';
+        //     } else {
+        //         popup.style.display = 'none';
+        //     }
+        // });
+        
+        socket.on('message', function(data) {
+            alert(data.msg); // Show a popup message
+        });
+
+        closePopup.addEventListener('click', function() {
+            popup.style.display = 'none';
+        });
+
+        let timerInterval;
+
+        function startTimer() {
+            let seconds = 0;
+            timerInterval = setInterval(function () {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                document.getElementById('timerDisplay').innerText = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }, 1000);
+        }
+
+        // function randomMode() {
+        //     const modes = ['Mode A', 'Mode B', 'Mode C'];
+        //     const randomMode = modes[Math.floor(Math.random() * modes.length)];
+        //     alert(`Random Mode: ${randomMode}`);
+        // }
+
+        var videoContainer = document.getElementById('video-container');
+
+        function takeScreenshot() {
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            canvas.width = videoContainer.offsetWidth;
+            canvas.height = videoContainer.offsetHeight;
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // You can save the canvas image or perform any other action
+            alert('Screenshot taken!');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function changeBackground() {
+            var randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            videoContainer.style.backgroundColor = randomColor;
+        }
+    </script>
+</body>
+</html>
