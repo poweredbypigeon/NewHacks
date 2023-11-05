@@ -6,21 +6,20 @@ import platform
 model = load_model('my_model.h5')
 
 
-def load_single_image(path, img_size=(48, 48)):
-    images = []
-    unix_path = path.replace('\\', '/')
-    path = path if platform.system() == 'Windows' else unix_path
+def load_single_image(image, img_size=(48, 48)):
+    #images = []
+    #unix_path = path.replace('\\', '/')
+    #path = path if platform.system() == 'Windows' else unix_path
     # Open image, resize it and convert to grayscale 
-    img = Image.open(path).resize(img_size).convert('L') 
+    img = Image.open(image).resize(img_size).convert('L') 
     # Convert image to numpy array and normalize (rescale) it
     img = np.array(img) / 255.0
-    images.append(img)
     
-    return np.array(images)
+    return img
 # Path to the new image
-def fatigue_pred(image_path):
+def fatigue_pred(image):
     # Preprocess the image
-    preprocessed_image = load_single_image(image_path)
+    preprocessed_image = load_single_image(image)
 
     # Predict the class with the model
     prediction = model.predict(preprocessed_image)
