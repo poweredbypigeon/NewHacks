@@ -86,6 +86,15 @@ import dlib
 from scipy.spatial import distance as dist
 import numpy as np
 
+# Load the pre-trained facial landmark predictor
+predictor_path = "eyetracker/shape_predictor_68_face_landmarks.dat"  # Download from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+predictor = dlib.shape_predictor(predictor_path)
+EAR_THRESHOLD = 0.2
+# Initialize flag for the first frame
+first_frame_processed = False
+# Load the face detector
+detector = dlib.get_frontal_face_detector()
+
 # Function to determine focus status for a single frame
 def determine_focus_status(frame):
     # Convert the frame to grayscale for better face detection
@@ -111,9 +120,9 @@ def determine_focus_status(frame):
 
         # Output whether the person is focused or not for the single frame
         if avg_ear < EAR_THRESHOLD:
-            return "Not Focused"
+            return False
         else:
-            return "Focused"
+            return True
 
 # Function to convert the facial landmarks to a NumPy array
 def shape_to_np(shape, dtype="int"):
@@ -121,13 +130,6 @@ def shape_to_np(shape, dtype="int"):
     for i in range(0, shape.num_parts):
         coords[i] = (shape.part(i).x, shape.part(i).y)
     return coords
-
-# Load the pre-trained facial landmark predictor
-predictor_path = "shape_predictor_68_face_landmarks.dat"  # Download from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-predictor = dlib.shape_predictor(predictor_path)
-
-# Load the face detector
-detector = dlib.get_frontal_face_detector()
 
 def get_eye_aspect_ratio(eye):
     # Calculate the Euclidean distances between the two sets of vertical eye landmarks
@@ -142,13 +144,6 @@ def get_eye_aspect_ratio(eye):
     return ear
 
 # Set the threshold for the eye aspect ratio to determine focus
-EAR_THRESHOLD = 0.2
-
-# Open the webcam
-cap = cv2.VideoCapture(0)
-
-# Initialize flag for the first frame
-first_frame_processed = False
 
 # for i in range(1):
 #     ret, frame = cap.read()
@@ -161,28 +156,28 @@ first_frame_processed = False
 #     if cv2.waitKey(1) & 0xFF == ord('q'):
 #         break
 
-def get_focus_status_for_frame(frame_number):
-    # Set the frame number
-    current_frame = 0
+# def get_focus_status_for_frame(frame_number):
+#     # Set the frame number
+#     current_frame = 0
 
-    while True:
-        ret, frame = cap.read()
+#     while True:
+#         ret, frame = cap.read()
 
-        # Check if it's the target frame
-        if current_frame == frame_number:
-            # Output focus status for the target frame
-            return determine_focus_status(frame)
+#         # Check if it's the target frame
+#         if current_frame == frame_number:
+#             # Output focus status for the target frame
+#             return determine_focus_status(frame)
 
-        current_frame += 1
+#         current_frame += 1
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
 
-    # Release the webcam
-    cap.release()
-    cv2.destroyAllWindows()
+#     # Release the webcam
+#     cap.release()
+#     cv2.destroyAllWindows()
 
-# Example usage:
-frame_number_to_check = 200 # Replace with the desired frame number
-focus_status_result = get_focus_status_for_frame(frame_number_to_check)
-print(f"Focus Status for Frame {frame_number_to_check}: {focus_status_result}")
+# # Example usage:
+# frame_number_to_check = 200 # Replace with the desired frame number
+# focus_status_result = get_focus_status_for_frame(frame_number_to_check)
+# print(f"Focus Status for Frame {frame_number_to_check}: {focus_status_result}")
