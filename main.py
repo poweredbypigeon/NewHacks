@@ -105,8 +105,8 @@ while True:
         popup_unfocus = True
     else:
         popup_unfocus = False
-    cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
-    cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 1, cv2.LINE_4)
+    cv2.putText(frame, "Time Elapsed: " + str(time), (50, 50), text_font, 0.8, (255, 0, 0), 2, cv2.LINE_4)
+    cv2.putText(frame, "Current State: " + cur_tired + " and " + cur_focus, (500, 50), text_font, 0.8, (255, 0, 0), 2, cv2.LINE_4)
 
     cv2.imshow('Output', frame)
 
