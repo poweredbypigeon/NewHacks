@@ -61,7 +61,49 @@ def check_tireness():
 def check_focusness():
 	pass
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Placeholder data (replace this with actual data collected during the session)
+focus_data = np.random.rand(10)  # Example focus data
+tiredness_data = np.random.rand(10)  # Example tiredness data
+
 def final_report():
-	pass
+
+    # everything below is just filler code that NEEDS TO BE EDITED
+    # Analyze and visualize focus and tiredness data
+
+    average_focus = np.mean(focus_data)
+    average_tiredness = np.mean(tiredness_data)
+
+    print("=== Session Report ===")
+    print(f"Average Focus: {average_focus}")
+    print(f"Average Tiredness: {average_tiredness}")
+
+    # Plotting focus and tiredness over time
+    time_points = np.arange(1, len(focus_data) + 1)
+
+    plt.figure(figsize=(10, 5))
+
+    # Plot Focus
+    plt.subplot(1, 2, 1)
+    plt.plot(time_points, focus_data, marker='o', linestyle='-', color='b')
+    plt.title('Focus Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Focus Level')
+
+    # Plot Tiredness
+    plt.subplot(1, 2, 2)
+    plt.plot(time_points, tiredness_data, marker='o', linestyle='-', color='r')
+    plt.title('Tiredness Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Tiredness Level')
+
+    plt.tight_layout()
+    plt.show()
+
+# # Call the function to generate the final report
+# final_report()
+
 
 
