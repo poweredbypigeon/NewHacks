@@ -11,3 +11,19 @@ TODO:
 3. list of good/bad websites
 in the end it's just supposed to trakc whether you're focused or not, and may give you warnings if you're under time. 
 */
+
+document.getElementById('myButton').addEventListener('click', function() {
+    // Send a request to your Python script
+    fetch('http://localhost:5000/endpoint', {
+        method: 'POST',
+        body: JSON.stringify({ data: 'your_data' }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response from your Python script
+        console.log(data);
+    });
+});
