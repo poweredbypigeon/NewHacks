@@ -21,15 +21,17 @@ import threading  # Import the threading module
 
 app = Flask(__name__)
 
+import main
+
 # Variable to track the state of data sending
-send_data = False
+send_data = True
 
 # Function to continuously send data
 def continuous_data_sender():
     global send_data
     while True:
         if send_data:
-            data = {'fatigued': 'add results of model here', 'focused': 'add results of model here'}
+            data = {'fatigued': cnn_running.fatigue_pred(), 'focused': 'add results of model here'}
             yield jsonify(data)
             time.sleep(33) # length of one frame 
 
