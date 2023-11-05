@@ -1,3 +1,4 @@
+'''
 from django.shortcuts import render
 import json
 from django.contrib.auth.models import User #####
@@ -12,3 +13,51 @@ def send_data():
     }
     number_of_times_clicked += 1 
     return JsonResponse(data)
+
+    
+'''
+from flask import Flask, request, jsonify
+import threading  # Import the threading module
+
+app = Flask(__name__)
+
+# Variable to track the state of data sending
+send_data = False
+
+# Function to continuously send data
+def continuous_data_sender():
+    global send_data
+    while True:
+        if send_data:
+            data = {'fatigued': 'add results of model here', 'focused': 'add results of model here'}
+            yield jsonify(data)
+            time.sleep(33) # length of one frame 
+
+@app.route('/endpoint', methods=['POST'])
+def toggle_data_sending():
+    global send_data
+    send_data = not send_data
+    return jsonify({'status': 'Data sending ' + ('enabled' if send_data else 'disabled')})
+
+if __name__ == '__main__':
+    # Start the continuous data sender in a separate thread
+    data_sender_thread = threading.Thread(target=continuous_data_sender)
+    data_sender_thread.daemon = True
+    data_sender_thread.start()
+
+    app.run(host='0.0.0.0', port=5000)
+'''
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/endpoint', methods=['POST'])
+def process_request():
+    data = request.get_json()
+    # Process data here
+    response_data = {'result': 'Processed data'}
+    return jsonify(response_data)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+'''
