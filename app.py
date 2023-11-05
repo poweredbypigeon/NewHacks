@@ -68,35 +68,69 @@
 # cv2.destroyAllWindows()
 
 
-import streamlit as st
-from streamlit_webrtc import webrtc_streamer
-import av
-import cv2
+# import streamlit as st
+# from streamlit_webrtc import webrtc_streamer
+# import av
+# import cv2
 
-st.title("My first Streamlit app")
-st.write("Hello, world")
+# st.title("My first Streamlit app")
+# st.write("Hello, world")
 
-threshold1 = st.slider("Threshold1", min_value=0, max_value=1000, step=1, value=100)
-threshold2 = st.slider("Threshold2", min_value=0, max_value=1000, step=1, value=200)
-
-
-def callback(frame):
-    img = frame.to_ndarray(format="bgr24")
-
-    img = cv2.cvtColor(cv2.Canny(img, threshold1, threshold2))
-
-    return av.VideoFrame.from_ndarray(img, format="bgr24")
+# threshold1 = st.slider("Threshold1", min_value=0, max_value=1000, step=1, value=100)
+# threshold2 = st.slider("Threshold2", min_value=0, max_value=1000, step=1, value=200)
 
 
-webrtc_streamer(
-    key="example",
-    video_frame_callback=callback,
-    rtc_configuration={  # Add this line
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    }
-)
+# def callback(frame):
+#     img = frame.to_ndarray(format="bgr24")
+
+#     img = cv2.cvtColor(cv2.Canny(img, threshold1, threshold2))
+
+#     return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 
+# webrtc_streamer(
+#     key="example",
+#     video_frame_callback=callback,
+#     rtc_configuration={  # Add this line
+#         "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+#     }
+# )
+
+
+
+
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
+import threading
+import time
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+send_data = True
+
+def continuous_data_sender():
+    global send_data
+    counter = 0
+    while True:
+        if send_data:
+            counter += 1
+            socketio.emit('data_update', {'counter': counter})
+            time.sleep(1)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@socketio.on('toggle_data_sending')
+def toggle_data_sending():
+    global send_data
+    send_data = not send_data
+    emit('status_update', {'status': 'Data sending ' + ('enabled' if send_data else 'disabled')})
+
+if __name__ == '__main__':
+    socketio.start_background_task(target=continuous_data_sender)
+    socketio.run(app, host='0.0.0.0', port=5000, debug = True)
 
 
 

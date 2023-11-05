@@ -10,8 +10,6 @@ import cv2, imutils
 import numpy as np
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
-from eyetracker.eyetracker import determine_focus_status
 from cnn_running import fatigue_pred
 
 tired_threshold = 0.05
@@ -19,7 +17,7 @@ focus_threshold = 0.05
 
 user_data = []
 frame_number = 1
-cur_tired = ""
+cur_state = ""
 text_font = cv2.FONT_HERSHEY_SIMPLEX
 
 def check_tiredness(user_data):
@@ -43,26 +41,15 @@ while True:
     frame = imutils.resize(frame,width = 1080) 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     res = cascade_classifier.detectMultiScale(gray, 1.3, 5)
-    cur_state = []
-    time = round(frame_number/30, 2)
-    cur_state.append(time)
 
     if len(res) > 0:
         (x,y,w,h) = res[0]
         w,h = max(w,h),max(w,h)
         # frame[y:y+h, x:x+w]
         if fatigue_pred(gray[y:y+h, x:x+w]) == True:
-            cur_tired = "Fatigue"
-            cur_state.append(True)
+            cur_state = "Fatigue"
         else: 
-            cur_tired = "Active"
-            cur_state.append(False)
-        if determine_focus_status(frame) == True:
-             cur_focus = "Focused"
-             cur_state.append(True)
-        else:
-             cur_focus = "Not Focused"
-             cur_state.append(False)
+            cur_state = "Active"
         frame = cv2.rectangle(frame, (x,y), (x + w, y + h), (0, 0 ,255), 3)
     else:
          cur_state.append(False)
@@ -94,19 +81,25 @@ while True:
 # def final_report():
 #     plt.figure(figsize=(10, 5))
 
-#     # Plot Focus
-#     plt.subplot(1, 2, 1)
-#     plt.plot(time_points, focus_data, marker='o', linestyle='-', color='b')
-#     plt.title('Focus Over Time')
-#     plt.xlabel('Time')
-#     plt.ylabel('Focus Level')
+    # Plot Focus
+    plt.subplot(1, 2, 1)
+    plt.plot(time_points, focus_data, marker='o', linestyle='-', color='b')
+    plt.title('Focus Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Focus Level')
 
-#     # Plot Tiredness
-#     plt.subplot(1, 2, 2)
-#     plt.plot(time_points, tiredness_data, marker='o', linestyle='-', color='r')
-#     plt.title('Tiredness Over Time')
-#     plt.xlabel('Time')
-#     plt.ylabel('Tiredness Level')
-# 	pass
+    # Plot Tiredness
+    plt.subplot(1, 2, 2)
+    plt.plot(time_points, tiredness_data, marker='o', linestyle='-', color='r')
+    plt.title('Tiredness Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Tiredness Level')
+
+    plt.tight_layout()
+    plt.show()
+
+# # Call the function to generate the final report
+# final_report()
+
 
 
