@@ -30,7 +30,8 @@ while True:
     if len(res) > 0:
         (x,y,w,h) = res[0]
         w,h = max(w,h),max(w,h)
-        if fatigue_pred(res[0]) == True:
+        # frame[y:y+h, x:x+w]
+        if fatigue_pred(gray[y:y+h, x:x+w]) == True:
             cur_state = "Fatigue"
         else: 
             cur_state = "Active"
